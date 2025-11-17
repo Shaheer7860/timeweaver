@@ -1,5 +1,5 @@
 [providers]
-python = "311"
+python = "3.11"
 
 [phases.setup]
 nixPkgs = ["python311"]
