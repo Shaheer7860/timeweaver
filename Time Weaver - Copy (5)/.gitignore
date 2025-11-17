@@ -23,11 +23,14 @@ wheels/
 .installed.cfg
 *.egg
 
-# Database
+# Database (created at runtime)
 *.db
 *.sqlite
 *.sqlite3
 calendar.db
+*.db-journal
+*.db-shm
+*.db-wal
 
 # IDE
 .vscode/
@@ -39,18 +42,20 @@ calendar.db
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # Environment
 .env
 .env.local
-
-# Netlify
-.netlify/
+.env.*.local
 
 # Logs
 *.log
+logs/
 
-# Old C++ files (optional - keep if you want)
+# Compiled files
 *.o
 *.exe
-TimeWeaver.exe
+
+# Documentation (not needed in deployment)
+Docs/

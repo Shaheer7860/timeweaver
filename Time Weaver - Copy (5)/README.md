@@ -1,132 +1,105 @@
-# Time Weaver - Python/Netlify Version
+# Time Weaver - Calendar Application
 
-A full-stack calendar application converted from C++ to Python, ready for Netlify deployment.
+A comprehensive calendar management application with personal and academic features.
 
-## Features
+## 🚀 Quick Deploy to Railway
 
-- **Multi-User System**: Personal, Student, Teacher, and Admin roles
-- **Event Management**: Create, edit, delete events with time slots
-- **Recurring Events**: Daily, weekly, monthly, and yearly recurrence patterns
-- **Holiday Calendar**: Religion-based holiday tracking
-- **Search & Filter**: Fast event search with Trie data structure
-- **Theme System**: 5 beautiful themes
-- **Academic Features**: University management, department system, teacher availability
+1. **Push to GitHub** (if not already done)
+2. Go to [railway.app](https://railway.app)
+3. Click **"New Project"** → **"Deploy from GitHub repo"**
+4. Select your repository
+5. Railway will auto-detect Python and deploy!
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 .
-├── app.py                 # Flask application (main server)
-├── database.py            # Database manager (SQLite)
-├── dsa_structures.py      # Data structures (Trie, LRU Cache, etc.)
-├── requirements.txt       # Python dependencies
-├── netlify.toml          # Netlify configuration
-├── runtime.txt           # Python version
-├── HolidayData.csv       # Holiday data
-├── calendar.db           # SQLite database (created on first run)
-└── public/               # Frontend files
-    ├── index.html
-    ├── app.js
-    ├── app_academic_features.js
-    └── style.css
+├── app.py                      # Main Flask application
+├── database.py                 # Database manager
+├── dsa_structures.py          # Data structures (Trie, LRU Cache)
+├── requirements.txt            # Python dependencies
+├── Procfile                    # Railway start command
+├── railway.json               # Railway configuration
+├── nixpacks.toml              # Python detection config
+├── HolidayData.csv             # Holiday data
+├── index.html                  # Frontend HTML
+├── style.css                   # Styles
+├── app.js                      # Main JavaScript
+└── app_academic_features.js   # Academic features JS
 ```
 
-## Local Development
+## ⚙️ Configuration
 
-### Prerequisites
-- Python 3.11+
-- pip
+### Railway Auto-Detection
+- ✅ Python 3.11 (via `nixpacks.toml`)
+- ✅ Dependencies from `requirements.txt`
+- ✅ Start command from `Procfile`: `python app.py`
 
-### Setup
+### Database
+- SQLite database (`calendar.db`) created automatically
+- Data persists on Railway (persistent storage)
+- Holidays loaded from `HolidayData.csv`
 
-1. **Install dependencies:**
+### Port
+- Automatically uses `PORT` environment variable (Railway sets this)
+
+## 🔧 Local Development
+
 ```bash
+# Install dependencies
 pip install -r requirements.txt
-```
 
-2. **Run the application:**
-```bash
+# Run the app
 python app.py
+
+# Access at http://localhost:8080
 ```
 
-3. **Access the application:**
-```
-http://localhost:8080
-```
+## 📊 Features
 
-The database will be created automatically on first run.
+- Personal and Academic calendar management
+- User authentication and profiles
+- Event creation, editing, and deletion
+- Task management
+- Holiday tracking (multiple religions)
+- Teacher availability system
+- Advanced search with Trie data structure
+- Recurring events support
 
-## Netlify Deployment
+## 🔐 Default Login
 
-### Option 1: Serverless Functions (Recommended)
+- **Admin**: `admin` / `admin123`
 
-1. **Create `.netlify/functions/api.py`:**
-```python
-from app import app
+## 📝 API Endpoints
 
-def handler(event, context):
-    return app(event, context)
-```
-
-2. **Deploy to Netlify:**
-   - Connect your repository to Netlify
-   - Set build command: `pip install -r requirements.txt`
-   - Set publish directory: `public`
-   - Deploy!
-
-### Option 2: Flask App (Alternative)
-
-For Netlify, you may need to use a serverless adapter. However, Netlify primarily supports serverless functions.
-
-**Recommended: Use Vercel or Railway for Flask deployment, or convert to serverless functions.**
-
-## API Endpoints
-
-All endpoints are under `/api/`:
-
+All API endpoints are prefixed with `/api/`:
 - `POST /api/user/add` - Register user
 - `POST /api/user/validate` - Login
 - `GET /api/events` - Get events
 - `POST /api/events` - Create event
-- `PUT /api/events/<id>` - Update event
-- `DELETE /api/events/<id>` - Delete event
-- And many more...
+- And more...
 
-See the original documentation for full API details.
+## 🐛 Troubleshooting
 
-## Database
+### Build Fails
+- Check Railway build logs
+- Verify `requirements.txt` is correct
+- Ensure Python version is compatible (3.11)
 
-The application uses SQLite (`calendar.db`). On first run:
-- Tables are created automatically
-- Universities and departments are populated
-- Holidays are loaded from `HolidayData.csv`
+### App Won't Start
+- Check Railway logs
+- Verify `Procfile` exists
+- Ensure `app.py` is in root directory
 
-## Default Credentials
+### Database Errors
+- Database is created automatically on first run
+- Check file permissions in logs
 
-- **Admin**: username: `admin`, password: `admin123`
+## 📚 Dependencies
 
-## Converting from C++
+- Flask 3.0.0
+- flask-cors 4.0.0
 
-This project was converted from C++ to Python:
-- `server.cpp` → `app.py` (Flask)
-- `database.cpp` → `database.py` (SQLite)
-- `dsa_structures.h` → `dsa_structures.py` (Python classes)
+## ✅ Ready for Railway!
 
-All functionality has been preserved.
-
-## Notes for Netlify
-
-1. **Database**: SQLite files are ephemeral on Netlify. Consider using:
-   - Netlify's serverless functions with external database (PostgreSQL, etc.)
-   - Or use a database service like Supabase, PlanetScale, etc.
-
-2. **File Storage**: For production, consider:
-   - Moving database to external service
-   - Using environment variables for configuration
-
-3. **Serverless Functions**: For better Netlify compatibility, consider converting Flask routes to individual serverless functions.
-
-## License
-
-Educational project - Data Structures & Algorithms course.
-
+Your project is optimized and ready to deploy on Railway! 🚀
