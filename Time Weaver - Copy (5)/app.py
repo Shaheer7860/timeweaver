@@ -10,15 +10,27 @@ import os
 import json
 from database import DatabaseManager, UserProfile, TeacherAvailabilitySlot
 
+# Configure Flask for Vercel serverless
 app = Flask(__name__, static_folder='public', static_url_path='')
 CORS(app)
+
+# Set JSON encoding to ensure proper UTF-8 handling
+app.config['JSON_AS_ASCII'] = False
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 
 # Initialize database manager
 db_manager = DatabaseManager()
 
 # Initialize database on module import (for serverless compatibility)
+# Lazy initialization - only initialize when needed
+_db_initialized = False
+
 def init_database():
     """Initialize database connection and tables"""
+    global _db_initialized
+    if _db_initialized and db_manager.is_open:
+        return True
+    
     if not db_manager.is_open:
         if not db_manager.open_database():
             print("Failed to open database")
@@ -27,18 +39,21 @@ def init_database():
             db_manager.create_tables()
             populate_holidays()
             db_manager.build_search_index()
+            _db_initialized = True
         except Exception as e:
             print(f"Database initialization error: {e}")
             # Continue anyway - database might already be initialized
+            _db_initialized = True  # Mark as attempted
     return True
 
-# Initialize on import (lazy initialization for serverless)
-# This ensures database is ready when Flask app starts
+# Database will be initialized on first request via before_request hook
+
+# Also try to initialize on import (for compatibility)
 try:
     init_database()
 except Exception as e:
     print(f"Initial database setup failed: {e}")
-    # Will retry on first request if needed
+    # Will retry on first request
 
 # Quote management
 quotes_map = {
@@ -754,16 +769,31 @@ def serve_static(path):
     # Don't serve API routes as static files
     if path.startswith('api/'):
         return jsonify({"error": "Not found"}), 404
+    
+    # Ensure database is initialized
+    if not _db_initialized:
+        init_database()
+    
     try:
         return send_from_directory('public', path)
-    except Exception:
+    except Exception as e:
         # If file doesn't exist, return index.html for SPA routing
-        return send_from_directory('public', 'index.html')
+        print(f"Static file error: {e}")
+        try:
+            return send_from_directory('public', 'index.html')
+        except Exception:
+            return jsonify({"error": "File not found"}), 404
 
 
 # Vercel serverless function handler
 # Vercel's @vercel/python automatically handles Flask apps
 # The app object is exported for Vercel to use
+# Ensure database is initialized before handling requests
+@app.before_request
+def before_request():
+    """Ensure database is initialized before each request"""
+    if not _db_initialized:
+        init_database()
 
 
 if __name__ == '__main__':
