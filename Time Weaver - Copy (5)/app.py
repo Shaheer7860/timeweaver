@@ -10,7 +10,7 @@ import os
 import json
 from database import DatabaseManager, UserProfile, TeacherAvailabilitySlot
 
-app = Flask(__name__, static_folder='public', static_url_path='')
+app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
 
 # Initialize database manager
@@ -736,7 +736,7 @@ def validate_roll():
 @app.route('/')
 @app.route('/index.html')
 def index():
-    return send_from_directory('public', 'index.html')
+    return send_from_directory('.', 'index.html')
 
 
 @app.route('/<path:path>')
@@ -746,10 +746,10 @@ def serve_static(path):
     if path.startswith('api/'):
         return jsonify({"error": "Not found"}), 404
     try:
-        return send_from_directory('public', path)
+        return send_from_directory('.', path)
     except Exception:
         # If file doesn't exist, return index.html for SPA routing
-        return send_from_directory('public', 'index.html')
+        return send_from_directory('.', 'index.html')
 
 
 if __name__ == '__main__':
