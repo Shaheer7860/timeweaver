@@ -67,10 +67,21 @@ class DatabaseManager:
             return True
         
         try:
-            self.db = sqlite3.connect("calendar.db", check_same_thread=False)
+            # Use current directory for Railway (has persistent storage)
+            # For serverless (Vercel), use /tmp
+            import os
+            if os.path.exists("/tmp") and os.environ.get("VERCEL"):
+                # Vercel serverless environment
+                db_path = "/tmp/calendar.db"
+            else:
+                # Railway or local development (persistent storage)
+                db_path = "calendar.db"
+            
+            self.db = sqlite3.connect(db_path, check_same_thread=False)
             self.is_open = True
             return True
-        except sqlite3.Error:
+        except sqlite3.Error as e:
+            print(f"Database connection error: {e}")
             return False
     
     def close_database(self) -> None:

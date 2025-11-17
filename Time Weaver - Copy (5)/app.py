@@ -183,20 +183,7 @@ def color_name_to_hex(name: str) -> str:
     return colors.get(name, "")
 
 
-# Static file serving
-@app.route('/')
-@app.route('/index.html')
-def index():
-    return send_from_directory('public', 'index.html')
-
-
-@app.route('/<path:path>')
-def serve_static(path):
-    """Serve static files"""
-    return send_from_directory('public', path)
-
-
-# API Routes
+# API Routes (defined first to take precedence over static routes)
 @app.route('/api/user/add', methods=['POST'])
 def add_user():
     """Add a new user"""
@@ -743,6 +730,26 @@ def validate_roll():
         "department": dept,
         "departmentName": dept_name
     })
+
+
+# Static file serving (defined last to avoid catching API routes)
+@app.route('/')
+@app.route('/index.html')
+def index():
+    return send_from_directory('public', 'index.html')
+
+
+@app.route('/<path:path>')
+def serve_static(path):
+    """Serve static files - only if not an API route"""
+    # Don't serve API routes as static files
+    if path.startswith('api/'):
+        return jsonify({"error": "Not found"}), 404
+    try:
+        return send_from_directory('public', path)
+    except Exception:
+        # If file doesn't exist, return index.html for SPA routing
+        return send_from_directory('public', 'index.html')
 
 
 if __name__ == '__main__':
