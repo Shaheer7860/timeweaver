@@ -10,50 +10,26 @@ import os
 import json
 from database import DatabaseManager, UserProfile, TeacherAvailabilitySlot
 
-# Configure Flask for Vercel serverless
 app = Flask(__name__, static_folder='public', static_url_path='')
 CORS(app)
-
-# Set JSON encoding to ensure proper UTF-8 handling
-app.config['JSON_AS_ASCII'] = False
-app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 
 # Initialize database manager
 db_manager = DatabaseManager()
 
 # Initialize database on module import (for serverless compatibility)
-# Lazy initialization - only initialize when needed
-_db_initialized = False
-
 def init_database():
     """Initialize database connection and tables"""
-    global _db_initialized
-    if _db_initialized and db_manager.is_open:
-        return True
-    
     if not db_manager.is_open:
         if not db_manager.open_database():
             print("Failed to open database")
             return False
-        try:
-            db_manager.create_tables()
-            populate_holidays()
-            db_manager.build_search_index()
-            _db_initialized = True
-        except Exception as e:
-            print(f"Database initialization error: {e}")
-            # Continue anyway - database might already be initialized
-            _db_initialized = True  # Mark as attempted
+        db_manager.create_tables()
+        populate_holidays()
+        db_manager.build_search_index()
     return True
 
-# Database will be initialized on first request via before_request hook
-
-# Also try to initialize on import (for compatibility)
-try:
-    init_database()
-except Exception as e:
-    print(f"Initial database setup failed: {e}")
-    # Will retry on first request
+# Initialize on import
+init_database()
 
 # Quote management
 quotes_map = {
@@ -207,7 +183,20 @@ def color_name_to_hex(name: str) -> str:
     return colors.get(name, "")
 
 
-# API Routes (defined first to take precedence over static routes)
+# Static file serving
+@app.route('/')
+@app.route('/index.html')
+def index():
+    return send_from_directory('public', 'index.html')
+
+
+@app.route('/<path:path>')
+def serve_static(path):
+    """Serve static files"""
+    return send_from_directory('public', path)
+
+
+# API Routes
 @app.route('/api/user/add', methods=['POST'])
 def add_user():
     """Add a new user"""
@@ -754,56 +743,6 @@ def validate_roll():
         "department": dept,
         "departmentName": dept_name
     })
-
-
-# Static file serving (defined last to avoid catching API routes)
-@app.route('/')
-@app.route('/index.html')
-def index():
-    return send_from_directory('public', 'index.html')
-
-
-@app.route('/<path:path>')
-def serve_static(path):
-    """Serve static files - only if not an API route"""
-    # Don't serve API routes as static files
-    if path.startswith('api/'):
-        return jsonify({"error": "Not found"}), 404
-    
-    # Ensure database is initialized
-    if not _db_initialized:
-        init_database()
-    
-    try:
-        return send_from_directory('public', path)
-    except Exception as e:
-        # If file doesn't exist, return index.html for SPA routing
-        print(f"Static file error: {e}")
-        try:
-            return send_from_directory('public', 'index.html')
-        except Exception:
-            return jsonify({"error": "File not found"}), 404
-
-
-# Vercel serverless function handler
-# Vercel's @vercel/python automatically handles Flask apps
-# The app object is exported for Vercel to use
-# Ensure database is initialized before handling requests
-@app.before_request
-def before_request():
-    """Ensure database is initialized before each request"""
-    if not _db_initialized:
-        init_database()
-
-
-# Explicit exports for Vercel
-# Vercel's @vercel/python looks for 'app' variable at module level
-# These exports ensure Vercel can find the Flask application
-handler = app
-application = app
-
-# The 'app' variable is already defined above and is what Vercel needs
-# These additional exports are for compatibility
 
 
 if __name__ == '__main__':

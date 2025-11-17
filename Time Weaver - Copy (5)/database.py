@@ -67,14 +67,7 @@ class DatabaseManager:
             return True
         
         try:
-            # Use /tmp for serverless environments (Vercel, AWS Lambda, etc.)
-            # In local development, use current directory
-            import os
-            if os.path.exists("/tmp"):
-                db_path = "/tmp/calendar.db"
-            else:
-                db_path = "calendar.db"
-            self.db = sqlite3.connect(db_path, check_same_thread=False)
+            self.db = sqlite3.connect("calendar.db", check_same_thread=False)
             self.is_open = True
             return True
         except sqlite3.Error:
