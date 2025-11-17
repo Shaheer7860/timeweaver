@@ -1,0 +1,37 @@
+# Compiled object files
+*.o
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation (not needed in deployment)
+Docs/
+*.md
+!README.md
+
+# Deployment configs for other platforms
+render.yaml
+netlify.toml
+
+# Database files (will be created at runtime)
+*.db
+*.db-journal
+
