@@ -796,6 +796,16 @@ def before_request():
         init_database()
 
 
+# Explicit exports for Vercel
+# Vercel's @vercel/python looks for 'app' variable at module level
+# These exports ensure Vercel can find the Flask application
+handler = app
+application = app
+
+# The 'app' variable is already defined above and is what Vercel needs
+# These additional exports are for compatibility
+
+
 if __name__ == '__main__':
     # Ensure database is initialized
     if not init_database():
